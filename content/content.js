@@ -274,6 +274,9 @@ async function getLAPIScovSpectrumSampleAggregated(region, timeFrame, mutations 
 }
 
 async function getPangolinLineageWHOLabel(pangolinLineageAlias) {
+    if(!pangolinLineageAlias) {
+        return "";
+    }
     var pangolinLineage = VARIANT_ALIASES[pangolinLineageAlias.split(".")[0]];
     if(!pangolinLineage) {
         pangolinLineage = pangolinLineageAlias;
