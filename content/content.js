@@ -386,7 +386,7 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
         }
 
         var tableClassification = getTable(
-            "Odhad varianty podle dat pro Česká Republika za poslední 1 měsíc",
+            "Odhad varianty podle dat pro Česká Republika za poslední 1 měsíc [ > 10%]",
             ["Kód varianty", "Název varianty dle WHO", "Klasifikace v %"],
             tableClassificationRows
         );
