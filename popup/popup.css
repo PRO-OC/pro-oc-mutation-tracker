@@ -1,0 +1,9 @@
+html, body {
+    width: 100px;
+    margin: 0px;
+  }
+  
+  button {
+    cursor: pointer;
+    width: 100%;
+  }
