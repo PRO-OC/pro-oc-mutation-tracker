@@ -15,7 +15,6 @@
     "js": ["content/content.js"]
   }],
   "permissions": [
-    "<all_urls>",
-    "tabs"
+    "<all_urls>"
   ]
 }

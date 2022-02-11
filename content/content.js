@@ -13,7 +13,9 @@ var mutationSectionsTable = {
         "P681H",
         "T761I",
         "L452R",
-        "Y505H"
+        "Y505H",
+        "K417T",
+        "P681R"
     ]
 };
 
@@ -66,8 +68,6 @@ const VARIANT_ALIASES = {
     "XC": ["AY.29","B.1.1.7"]
 }
 
-
-// WHO https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/
 // TODO: no static
 const VARIANT_WHO_CONCERN = 'concern';
 const VARIANT_WHO_INTEREST = 'interest';
@@ -131,13 +131,24 @@ const WHO_VARIANT_LABELS = {
     },
 };
 
-const REGION_CZECHIA = "Czech Republic";
+function translateRegion(oldRegion) {
+    switch(oldRegion) {
+        case REGION_CZECH_REPUBLIC:
+            return REGION_CZECHIA;
+        default:
+            return oldRegion;
+    }
+}
+
+const REGION_CZECHIA = "Czechia";
+const REGION_CZECH_REPUBLIC = "Czech Republic";
 const REGION_EUROPE = "Europe";
 const REGION_WORD = "World";
-const REGIONS = [REGION_CZECHIA, REGION_EUROPE, REGION_WORD];
+const REGIONS = [REGION_CZECH_REPUBLIC, REGION_EUROPE, REGION_WORD];
 
 const MONTH_DAYS_COUNT = 30;
 
+const ALL_TIMES = "AllTimes";
 const PAST_1_MONTH = "Past1M";
 const PAST_1_MONTH_TEXT = "Poslední 1 měsíc";
 const PAST_3_MONTHS = "Past3M";
@@ -229,6 +240,20 @@ function getLAPIScovSpectrumUrl() {
     return "https://lapis.cov-spectrum.org/gisaid/v1/sample/aggregated";
 }
 
+function getCovSpectrumUrl(region, timeFrame, mutations) {
+    
+    // params
+    var urlParams = new URLSearchParams();
+    var variantQuery = translateMutationsToCovSpectrumOrgAdvancedSearch(mutations);
+    if(variantQuery) {
+        urlParams.set("variantQuery", variantQuery);
+    }
+
+    var url = "https://cov-spectrum.org/explore/" + region + "/AllSamples/" + timeFrame + "/variants?" + urlParams.toString();
+
+    return url;
+}
+
 function getLAPISCovSpectrumUrlParams(region, timeFrame, mutations, fields = "") {
     var urlParams = new URLSearchParams();
     if(region != REGION_WORD) {
@@ -316,6 +341,14 @@ function translateTimeFrame(timeFrame) {
     }
 }
 
+function getCovLineagesLineageUrl(lineageName) {
+    return "https://cov-lineages.org/lineage.html?lineage=" + lineageName;
+}
+
+function getWHOTrackingVariantsUrl() {
+    return "https://www.who.int/en/activities/tracking-SARS-CoV-2-variants#PageContent_C238_Col01";
+}
+
 async function addAdditionalMutationInformation(regions, timeFrames) {
 
     var headersWithMutationsNodes = document.evaluate("//th[contains(text(), 'Kód mutace')]", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -339,8 +372,9 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
         for(const [x, region] of regions.entries()) {
             data[region] = [];
             for(const [y, timeFrame] of timeFrames.entries()) {
+                // returns format 10 (char `%` for percents is not included) 
                 var value = await getProportionAmongAllSequencedSamplesInTheSelectedTimeFrame(region, timeFrame, mutations);
-                data[region].push(value);
+                data[region][timeFrame] = value;
             }
         }
 
@@ -349,8 +383,14 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
             return translateTimeFrame(timeFrame); 
         }));
         var tableRegionsRows = Object.keys(data).map(function(region) {
-            return [region].concat(data[region].map(function(value) {
-                return value + "%";
+            return [region].concat(Object.keys(data[region]).map(function(timeFrame) {
+                const value = data[region][timeFrame];
+                // timeFrame 1 month is not supported
+                if(timeFrame == PAST_1_MONTH) {
+                    return value + "%";
+                } else {
+                    return "<a href='" + getCovSpectrumUrl(translateRegion(region), timeFrame, mutations) + "'>" + value + "%" + "</a>";
+                }
             }));
         });
         var tableRegions = getTable(
@@ -365,8 +405,8 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
 
         // classification table    
         var tableClassificationRows = [];
-        var withMutations = await getLAPIScovSpectrumSampleAggregated(REGION_CZECHIA, PAST_1_MONTH, mutations);
-        var pangolinLineages = await getPangolinLineagesToWhichBelongThisCombinationOfMutations(REGION_CZECHIA, PAST_1_MONTH, mutations);
+        var withMutations = await getLAPIScovSpectrumSampleAggregated(REGION_CZECH_REPUBLIC, PAST_1_MONTH, mutations);
+        var pangolinLineages = await getPangolinLineagesToWhichBelongThisCombinationOfMutations(REGION_CZECH_REPUBLIC, PAST_1_MONTH, mutations);
         for(const [i, pangolin] of pangolinLineages.entries()) {
 
             var percents = Math.round((pangolin.count / withMutations[0].count) * 100);
@@ -376,17 +416,18 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
 
             var pangoLineageWHOName = await getPangolinLineageWHOLabel(pangolin.pangoLineage);
 
+            // Why AllSamples = timeFrame since ages up to now. Because timeFrame 1 month & and custom is not supported.
             var pangoLineageRow = [
-                pangolin.pangoLineage,
-                pangoLineageWHOName,
-                percents + "%"
+                "<a href='" + getCovLineagesLineageUrl(pangolin.pangoLineage) + "'>" + pangolin.pangoLineage + "</a>",
+                "<a href='" + getWHOTrackingVariantsUrl() + "'>" + pangoLineageWHOName + "</a>",
+                "<a href='" + getCovSpectrumUrl(REGION_CZECHIA, ALL_TIMES, mutations) + "'>" + percents + "%" + "</a>"
             ];
 
             tableClassificationRows.push(pangoLineageRow);
         }
 
         var tableClassification = getTable(
-            "Odhad varianty podle dat pro Česká Republika za poslední 1 měsíc [ > 10%]",
+            "Klasifikace varianty podle celogenomově sekvenovaných vzorků v České Republice za poslední 1 měsíc [ > 10%]",
             ["Kód varianty", "Název varianty dle WHO", "Klasifikace v %"],
             tableClassificationRows
         );
@@ -411,7 +452,7 @@ function getTable(captionText, headers, rows) {
     var tableElement = document.createElement("table");
     tableElement.setAttribute("style", "width: 80%;margin-left: 10%;margin-right: 10%; background-color: #d5f6f6;color: #000;");
     var captionElement = document.createElement("caption");
-    captionElement.innerText = captionText;
+    captionElement.innerHTML = captionText;
     var tbodyElement = document.createElement("tbody");
     var trHeaderElement = document.createElement("tr");
 
@@ -420,7 +461,7 @@ function getTable(captionText, headers, rows) {
         var thHeaderElement = document.createElement("th");
         thHeaderElement.setAttribute("class", "k-header");
         thHeaderElement.setAttribute("style", "background-color:#fff2eb");
-        thHeaderElement.innerText = header;
+        thHeaderElement.innerHTML = header;
         trHeaderElement.appendChild(thHeaderElement);
     }
     tbodyElement.appendChild(trHeaderElement);
@@ -430,7 +471,7 @@ function getTable(captionText, headers, rows) {
         var trRowElement = document.createElement("tr");
         row.forEach(function(col) {
             var tdRowElement = document.createElement("td");
-            tdRowElement.innerText = col;
+            tdRowElement.innerHTML = col;
             trRowElement.appendChild(tdRowElement);
         });
         tbodyElement.appendChild(trRowElement);
