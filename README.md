@@ -4,7 +4,7 @@
 
 ![Preview](preview/nahled.png)
 
-Rozšíření přidává užitečné informace do modulu [Pacienti COVID-19](https://ereg.ksrzis.cz/Registr/CUDZadanky/VyhledaniPacienta) s cílem klasifikovat název varianty. ikování názvu varianty podle WHO ze zjištěných mutací.
+Rozšíření přidává do modulu [Pacienti COVID-19](https://ereg.ksrzis.cz/Registr/CUDZadanky/VyhledaniPacienta) rozšířenost zjištěných mutací a % klasifikaci [WHO označení](https://www.who.int/en/activities/tracking-SARS-CoV-2-variants#PageContent_C238_Col01) varianty podle celogenomově sekvenovaných vzorků z testovaných mutací.
 
 ## Zásady ochrany osobních údajů
 
