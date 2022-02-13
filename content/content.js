@@ -1,4 +1,4 @@
-// Testing purpose: https://ereg.ksrzis.cz/Registr/CUDZadanky/PacientDetail/Index/1004845
+// Testing purpose: https://ereg.ksrzis.cz/Registr/CUDZadanky/PacientDetail/Index/10301493
 
 // TODO: all
 // TODO: no static
@@ -19,118 +19,6 @@ var mutationSectionsTable = {
     ]
 };
 
-// TODO: no static
-const VARIANT_ALIASES = {   
-    "A": "",
-    "B": "",
-    "C": "B.1.1.1",
-    "D": "B.1.1.25",
-    "G": "B.1.258.2",
-    "K": "B.1.1.277",
-    "L": "B.1.1.10",
-    "M": "B.1.1.294",
-    "N": "B.1.1.33",
-    "P": "B.1.1.28",
-    "Q": "B.1.1.7",
-    "R": "B.1.1.316",
-    "S": "B.1.1.217",
-    "U": "B.1.177.60",
-    "V": "B.1.177.54",
-    "W": "B.1.177.53",
-    "Y": "B.1.177.52",
-    "Z": "B.1.177.50",
-    "AA": "B.1.177.15",
-    "AB": "B.1.160.16",
-    "AC": "B.1.1.405",
-    "AD": "B.1.1.315",
-    "AE": "B.1.1.306",
-    "AF": "B.1.1.305",
-    "AG": "B.1.1.297",
-    "AH": "B.1.1.241",
-    "AJ": "B.1.1.240",
-    "AK": "B.1.1.232",
-    "AL": "B.1.1.231",
-    "AM": "B.1.1.216",
-    "AN": "B.1.1.200",
-    "AP": "B.1.1.70",
-    "AQ": "B.1.1.39",
-    "AS": "B.1.1.317",
-    "AT": "B.1.1.370",
-    "AU": "B.1.466.2",
-    "AV": "B.1.1.482",
-    "AW": "B.1.1.464",
-    "AY": "B.1.617.2",
-    "AZ": "B.1.1.318",
-    "BA": "B.1.1.529",
-    "BB": "B.1.621.1",
-    "XA": ["B.1.1.7","B.1.177"],
-    "XB": ["B.1.634","B.1.631"],
-    "XC": ["AY.29","B.1.1.7"]
-}
-
-// TODO: no static
-const VARIANT_WHO_CONCERN = 'concern';
-const VARIANT_WHO_INTEREST = 'interest';
-
-const WHO_VARIANT_LABELS = {
-    'B.1.1.7': {
-      label: 'Alpha',
-      type: VARIANT_WHO_CONCERN,
-    },
-    'B.1.351': {
-      label: 'Beta',
-      type: VARIANT_WHO_CONCERN,
-    },
-    'P.1': {
-      label: 'Gamma',
-      type: VARIANT_WHO_CONCERN,
-    },
-    'B.1.617.2': {
-      label: 'Delta',
-      type: VARIANT_WHO_CONCERN,
-    },
-    'B.1.427': {
-      label: 'Epsilon',
-      type: VARIANT_WHO_INTEREST
-    },
-    'B.1.429': {
-      label: 'Epsilon',
-      type: VARIANT_WHO_INTEREST
-    },
-    'P.2': {
-      label: 'Zeta',
-      type: VARIANT_WHO_INTEREST
-    },
-    'B.1.525': {
-      label: 'Eta',
-      type: VARIANT_WHO_INTEREST
-    },
-    'P.3': {
-      label: 'Theta',
-      type: VARIANT_WHO_INTEREST
-    },
-    'B.1.526': {
-      label: 'Iota',
-      type: VARIANT_WHO_INTEREST
-    },
-    'B.1.617.1': {
-      label: 'Kappa',
-      type: VARIANT_WHO_INTEREST
-    },
-    'B.1.621': {
-      label: 'Mu',
-      type: VARIANT_WHO_INTEREST
-    },
-    'C.37': {
-      label: 'Lambda',
-      type: VARIANT_WHO_INTEREST
-    },
-    'B.1.1.529': {
-      label: 'Omicron',
-      type: VARIANT_WHO_CONCERN,
-    },
-};
-
 function translateRegion(oldRegion) {
     switch(oldRegion) {
         case REGION_CZECH_REPUBLIC:
@@ -146,7 +34,7 @@ const REGION_EUROPE = "Europe";
 const REGION_WORD = "World";
 const REGIONS = [REGION_CZECH_REPUBLIC, REGION_EUROPE, REGION_WORD];
 
-const MONTH_DAYS_COUNT = 30;
+const MONTH_DAYS_AVERAGE_COUNT = 30;
 
 const ALL_TIMES = "AllTimes";
 const PAST_1_MONTH = "Past1M";
@@ -159,6 +47,12 @@ const TIME_FRAMES = [PAST_1_MONTH, PAST_3_MONTHS, PAST_6_MONTHS];
 
 const PANGOLIN_LINEAGE_DISPLAY_TRESHOLD_IN_PERCENTS = 10;
 
+const LINEAGE_LABEL_WHO = "WHO";
+const LINEAGE_LABEL_WHO_TEXT = "Název varianty dle WHO";
+const LINEAGE_LABEL_PHE = "PHE";
+const LINEAGE_LABEL_PHE_TEXT = "Název varianty dle PHE";
+const LINEAGE_LABEL_NEXTSTRAIN = "Nextstrain";
+const LINEAGE_LABEL_NEXTSTRAIN_TEXT = "Název varianty dle Nextstrain";
 
 function translateMutationsToCovSpectrumOrgAdvancedSearch(mutations) {
     var variantQuery = "";
@@ -221,13 +115,13 @@ function getDateFromFromTimeFrame(timeFrame) {
 
     switch(timeFrame) {
         case PAST_1_MONTH:
-            date.setDate(date.getDate() - 1 * MONTH_DAYS_COUNT);
+            date.setDate(date.getDate() - 1 * MONTH_DAYS_AVERAGE_COUNT);
             break;
         case PAST_3_MONTHS:
-            date.setDate(date.getDate() - 3 * MONTH_DAYS_COUNT);
+            date.setDate(date.getDate() - 3 * MONTH_DAYS_AVERAGE_COUNT);
             break;
         case PAST_6_MONTHS:
-            date.setDate(date.getDate() - 6 * MONTH_DAYS_COUNT);
+            date.setDate(date.getDate() - 6 * MONTH_DAYS_AVERAGE_COUNT);
             break;
         default:
             return date;
@@ -298,21 +192,68 @@ async function getLAPIScovSpectrumSampleAggregated(region, timeFrame, mutations 
     });
 }
 
-async function getPangolinLineageWHOLabel(pangolinLineageAlias) {
-    if(!pangolinLineageAlias) {
-        return "";
-    }
-    var pangolinLineage = VARIANT_ALIASES[pangolinLineageAlias.split(".")[0]];
-    if(!pangolinLineage) {
-        pangolinLineage = pangolinLineageAlias;
-    }
-    var label = "";
-    for(var lineage in WHO_VARIANT_LABELS) {
-        if(lineage == pangolinLineage) {
-            label = WHO_VARIANT_LABELS[lineage].label;
-        }
-    }
-    return label;
+// repository url: https://github.com/cov-lineages/lineages-website
+// file: lineage.html
+async function getPangolinLineageLabels(pangolinLineageAlias) {
+
+    return new Promise(function (resolve, reject) {
+
+        var pageName = "c" + pangolinLineageAlias + ".json";
+        var directory = "https://raw.githubusercontent.com/cov-lineages/constellations/main/constellations/definitions/";
+
+        var whoName = "";
+        var pheNames = [];
+        var nextStrain = "";
+
+        $.ajax({
+            type: 'HEAD',
+            url: directory + pageName,
+            success: function() {
+
+                d3.json(directory + pageName, function(json) {
+
+                    if(json["variant"]["WHO_label"]) {
+                        whoName = json["variant"]["WHO_label"];
+                    }
+
+                    d3.text("https://raw.githubusercontent.com/phe-genomics/variant_definitions/main/README.md", function(text) {
+
+                        var lines = text.split("\n");
+
+                        for(var line of lines) {
+
+                            if(line.indexOf(pangolinLineageAlias) > 0) {
+                                var split = line.split(">");
+
+                                pheNames.push(split[1].split("<")[0]);
+
+                                if(line.indexOf("nextstrain:") > 0) {
+                                    split = line.split("nextstrain:");
+                                    var split2 = split[1].split(">");
+                                    if(split2[1].split("<")[0]) {
+                                        nextStrain = split2[1].split("<")[0];
+                                    }
+                                }
+                            }
+                        }
+
+                        resolve({
+                            [LINEAGE_LABEL_PHE]: pheNames.length ? pheNames.join(", ") : "",
+                            [LINEAGE_LABEL_WHO]: whoName,
+                            [LINEAGE_LABEL_NEXTSTRAIN]: nextStrain
+                        });
+                    });
+                });
+            },
+            error: function() {
+                resolve({
+                    [LINEAGE_LABEL_PHE]: pheNames.length ? pheNames.join(", ") : "",
+                    [LINEAGE_LABEL_WHO]: whoName,
+                    [LINEAGE_LABEL_NEXTSTRAIN]: nextStrain,
+                });
+            }
+        });
+    });
 }
 
 async function getPangolinLineagesToWhichBelongThisCombinationOfMutations(region, timeFrame, mutations) {
@@ -343,6 +284,14 @@ function translateTimeFrame(timeFrame) {
 
 function getCovLineagesLineageUrl(lineageName) {
     return "https://cov-lineages.org/lineage.html?lineage=" + lineageName;
+}
+
+function getNextstrainTrackingVariantsUrl() {
+    return "https://covariants.org/";
+}
+
+function getPHETrackingVariantsUrl() {
+    return "https://github.com/phe-genomics/variant_definitions/blob/main/README.md";
 }
 
 function getWHOTrackingVariantsUrl() {
@@ -414,12 +363,14 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
                 break;
             }
 
-            var pangoLineageWHOName = await getPangolinLineageWHOLabel(pangolin.pangoLineage);
+            var pangoLineageLabels = await getPangolinLineageLabels(pangolin.pangoLineage);
 
             // Why AllSamples = timeFrame since ages up to now. Because timeFrame 1 month & and custom is not supported.
             var pangoLineageRow = [
                 "<a href='" + getCovLineagesLineageUrl(pangolin.pangoLineage) + "'>" + pangolin.pangoLineage + "</a>",
-                "<a href='" + getWHOTrackingVariantsUrl() + "'>" + pangoLineageWHOName + "</a>",
+                "<a href='" + getWHOTrackingVariantsUrl() + "'>" + pangoLineageLabels[LINEAGE_LABEL_WHO] + "</a>",
+                "<a href='" + getPHETrackingVariantsUrl() + "'>" + pangoLineageLabels[LINEAGE_LABEL_PHE] + "</a>",
+                "<a href='" + getNextstrainTrackingVariantsUrl() + "'>" + pangoLineageLabels[LINEAGE_LABEL_NEXTSTRAIN] + "</a>",
                 "<a href='" + getCovSpectrumUrl(REGION_CZECHIA, ALL_TIMES, mutations) + "'>" + percents + "%" + "</a>"
             ];
 
@@ -428,7 +379,7 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
 
         var tableClassification = getTable(
             "Klasifikace varianty podle celogenomově sekvenovaných vzorků v České Republice za poslední 1 měsíc [ > 10%]",
-            ["Kód varianty", "Název varianty dle WHO", "Klasifikace v %"],
+            ["Kód varianty", LINEAGE_LABEL_WHO_TEXT, LINEAGE_LABEL_PHE_TEXT, LINEAGE_LABEL_NEXTSTRAIN_TEXT, "Klasifikace v %"],
             tableClassificationRows
         );
 
@@ -439,7 +390,7 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
     }
 }
 
-var accordionZadankyActions = document.querySelector('#accordionZadanky > div > .actions');
+var accordionZadankyActions = document.querySelector('#accordionZadanky');
 
 if(accordionZadankyActions) {
     addAdditionalMutationInformation(REGIONS, TIME_FRAMES);
