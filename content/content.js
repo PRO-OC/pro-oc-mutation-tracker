@@ -55,6 +55,10 @@ const LINEAGE_LABEL_PHE_TEXT = "Název varianty dle PHE";
 const LINEAGE_LABEL_NEXTSTRAIN = "Nextstrain";
 const LINEAGE_LABEL_NEXTSTRAIN_TEXT = "Název varianty dle Nextstrain";
 
+const STATS_OVERALL_COUNT = "overallCount";
+const STATS_MUTATIONS_SPECIFIED_COUNT = "mutationSpecifiedCount";
+const STATS_PRECALCULATED_PERCENTS = "percents";
+
 function translateMutationsToCovSpectrumOrgAdvancedSearch(mutations) {
     var variantQuery = "";
 
@@ -265,11 +269,21 @@ async function getPangolinLineagesToWhichBelongThisCombinationOfMutations(region
     return pangoLineages;
 }
 
-async function getProportionAmongAllSequencedSamplesInTheSelectedTimeFrame(region, timeFrame, mutations) {
+async function getStatsOfAllSequencedSamplesInTheSelectedTimeFrameAndSpecifiedMutations(region, timeFrame, mutations) {
+    
     var withMutations = await getLAPIScovSpectrumSampleAggregated(region, timeFrame, mutations);
+    var withMutationsCount = withMutations[0].count;
     var overall = await getLAPIScovSpectrumSampleAggregated(region, timeFrame);
+    var overallCount = overall[0].count;
     var percents = Math.round((withMutations[0].count / overall[0].count) * 100);
-    return percents;
+
+    var result = {
+        [STATS_OVERALL_COUNT]: overallCount,
+        [STATS_MUTATIONS_SPECIFIED_COUNT]: withMutationsCount,
+        [STATS_PRECALCULATED_PERCENTS]: percents,
+    }
+
+    return result;
 }
 
 function translateTimeFrame(timeFrame) {
@@ -323,8 +337,8 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
             data[region] = [];
             for(const [y, timeFrame] of timeFrames.entries()) {
                 // returns format 10 (char `%` for percents is not included) 
-                var value = await getProportionAmongAllSequencedSamplesInTheSelectedTimeFrame(region, timeFrame, mutations);
-                data[region][timeFrame] = value;
+                var stats = await getStatsOfAllSequencedSamplesInTheSelectedTimeFrameAndSpecifiedMutations(region, timeFrame, mutations);
+                data[region][timeFrame] = stats;
             }
         }
 
@@ -334,12 +348,12 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
         }));
         var tableRegionsRows = Object.keys(data).map(function(region) {
             return [region].concat(Object.keys(data[region]).map(function(timeFrame) {
-                const value = data[region][timeFrame];
+                const stats = data[region][timeFrame];
                 // timeFrame 1 month is not supported
                 if(timeFrame == PAST_1_MONTH) {
-                    return value + "%";
+                    return stats[STATS_PRECALCULATED_PERCENTS] + "%" + " <sup>" + stats[STATS_MUTATIONS_SPECIFIED_COUNT] + "/" + stats[STATS_OVERALL_COUNT] + "</sup>";
                 } else {
-                    return "<a href='" + getCovSpectrumUrl(translateRegion(region), timeFrame, mutations) + "'>" + value + "%" + "</a>";
+                    return "<a href='" + getCovSpectrumUrl(translateRegion(region), timeFrame, mutations) + "'>" + stats[STATS_PRECALCULATED_PERCENTS] + "%" + "</a><sup>" + stats[STATS_MUTATIONS_SPECIFIED_COUNT] + "/" + stats[STATS_OVERALL_COUNT] + "</sup>";
                 }
             }));
         });
