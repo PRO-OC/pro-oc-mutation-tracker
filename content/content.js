@@ -246,7 +246,7 @@ async function getPangolinLineageLabels(pangolinLineageGiven) {
                     var pangolinLineageParent = json[pangolinLineageGiven.split(".")[0]];
 
                     var pangolinLineage = pangolinLineageGiven;
-                    if(pangolinLineageParent && !pangolinLineageParent.isArray()) {
+                    if(pangolinLineageParent && !Array.isArray(pangolinLineageParent)) {
                         pangolinLineage = pangolinLineageParent;
                     }
 
