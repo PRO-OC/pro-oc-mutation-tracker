@@ -1,4 +1,5 @@
 // Testing purpose: https://ereg.ksrzis.cz/Registr/CUDZadanky/PacientDetail/Index/10301493
+// Testing purpose: Omicron https://ereg.ksrzis.cz/Registr/CUDZadanky/PacientDetail/Index/11263038
 
 // TODO: all
 // TODO: no static
@@ -365,7 +366,9 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
 
             var pangoLineageLabels = await getPangolinLineageLabels(pangolin.pangoLineage);
 
-            // Why AllSamples = timeFrame since ages up to now. Because timeFrame 1 month & and custom is not supported.
+            // Why data (variable pangolinLineages) are from past 1 month and link is since ages up to now?
+            //
+            // Because timeFrame in UI (no) does not support atm custom time frame range and API (yes) supports.
             var pangoLineageRow = [
                 "<a href='" + getCovLineagesLineageUrl(pangolin.pangoLineage) + "'>" + pangolin.pangoLineage + "</a>",
                 "<a href='" + getWHOTrackingVariantsUrl() + "'>" + pangoLineageLabels[LINEAGE_LABEL_WHO] + "</a>",
