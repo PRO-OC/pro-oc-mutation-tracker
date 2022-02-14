@@ -199,54 +199,94 @@ async function getLAPIScovSpectrumSampleAggregated(region, timeFrame, mutations 
 
 // repository url: https://github.com/cov-lineages/lineages-website
 // file: lineage.html
-async function getPangolinLineageLabels(pangolinLineageAlias) {
+async function getPangolinLineageLabels(pangolinLineageGiven) {
 
     return new Promise(function (resolve, reject) {
 
-        var pageName = "c" + pangolinLineageAlias + ".json";
-        var directory = "https://raw.githubusercontent.com/cov-lineages/constellations/main/constellations/definitions/";
-
-        var whoName = "";
-        var pheNames = [];
-        var nextStrain = "";
+        var pangoAliasesFile = "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json";
 
         $.ajax({
             type: 'HEAD',
-            url: directory + pageName,
+            url: pangoAliasesFile,
             success: function() {
 
-                d3.json(directory + pageName, function(json) {
+                d3.json(pangoAliasesFile, function(json) {
 
-                    if(json["variant"]["WHO_label"]) {
-                        whoName = json["variant"]["WHO_label"];
+                    var pangolinLineageParent = json[pangolinLineageGiven.split(".")[0]];
+
+                    var pangolinLineage = pangolinLineageGiven;
+                    if(pangolinLineageParent && !pangolinLineageParent.isArray()) {
+                        pangolinLineage = pangolinLineageParent;
                     }
 
-                    d3.text("https://raw.githubusercontent.com/phe-genomics/variant_definitions/main/README.md", function(text) {
+                    var pageName = "c" + pangolinLineage + ".json";
+                    var directory = "https://raw.githubusercontent.com/cov-lineages/constellations/main/constellations/definitions/";
 
-                        var lines = text.split("\n");
+                    var whoName = "";
+                    var pheNames = [];
+                    var nextStrain = "";
 
-                        for(var line of lines) {
+                    $.ajax({
+                        type: 'HEAD',
+                        url: directory + pageName,
+                        success: function() {
 
-                            if(line.indexOf(pangolinLineageAlias) > 0) {
-                                var split = line.split(">");
+                            d3.json(directory + pageName, function(json) {
 
-                                pheNames.push(split[1].split("<")[0]);
-
-                                if(line.indexOf("nextstrain:") > 0) {
-                                    split = line.split("nextstrain:");
-                                    var split2 = split[1].split(">");
-                                    if(split2[1].split("<")[0]) {
-                                        nextStrain = split2[1].split("<")[0];
-                                    }
+                                if(json["variant"]["WHO_label"]) {
+                                    whoName = json["variant"]["WHO_label"];
                                 }
-                            }
-                        }
 
-                        resolve({
-                            [LINEAGE_LABEL_PHE]: pheNames.length ? pheNames.join(", ") : "",
-                            [LINEAGE_LABEL_WHO]: whoName,
-                            [LINEAGE_LABEL_NEXTSTRAIN]: nextStrain
-                        });
+                                d3.text("https://raw.githubusercontent.com/phe-genomics/variant_definitions/main/README.md", function(text) {
+
+                                    var lines = text.split("\n");
+
+                                    for(var line of lines) {
+
+                                        if(line.indexOf(pangolinLineage) > 0) {
+                                            var split = line.split(">");
+                                            pheNames.push(split[1].split("<")[0]);
+                                        }
+                                    }
+
+                                    var nextstrainFileUrl = "https://raw.githubusercontent.com/hodcroftlab/covariants/master/web/data/nameTable.json";
+
+                                    $.ajax({
+                                        type: 'HEAD',
+                                        url: nextstrainFileUrl,
+                                        success: function() {
+                                            d3.json(nextstrainFileUrl, function(nextstrainJson) {
+                                                for(var cladeInfo of nextstrainJson["nameTable"]) {
+                                                    if(cladeInfo.lineages.length > 0 && pangolinLineageGiven.startsWith(cladeInfo.lineages[0].name)) {
+                                                        nextStrain = cladeInfo.clade;
+                                                    }
+                                                }
+
+                                                resolve({
+                                                    [LINEAGE_LABEL_PHE]: pheNames.length ? pheNames.join(", ") : "",
+                                                    [LINEAGE_LABEL_WHO]: whoName,
+                                                    [LINEAGE_LABEL_NEXTSTRAIN]: nextStrain
+                                                });
+                                            });
+                                        },
+                                        error: function() {
+                                            resolve({
+                                                [LINEAGE_LABEL_PHE]: pheNames.length ? pheNames.join(", ") : "",
+                                                [LINEAGE_LABEL_WHO]: whoName,
+                                                [LINEAGE_LABEL_NEXTSTRAIN]: nextStrain,
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+                        },
+                        error: function() {
+                            resolve({
+                                [LINEAGE_LABEL_PHE]: pheNames.length ? pheNames.join(", ") : "",
+                                [LINEAGE_LABEL_WHO]: whoName,
+                                [LINEAGE_LABEL_NEXTSTRAIN]: nextStrain,
+                            });
+                        }
                     });
                 });
             },
@@ -367,7 +407,7 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
             headersWithMutationsNodes.snapshotItem(i).parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling
         );
 
-        // classification table    
+        // classification table
         var tableClassificationRows = [];
         var withMutations = await getLAPIScovSpectrumSampleAggregated(REGION_CZECH_REPUBLIC, PAST_1_MONTH, mutations);
         var pangolinLineages = await getPangolinLineagesToWhichBelongThisCombinationOfMutations(REGION_CZECH_REPUBLIC, PAST_1_MONTH, mutations);
