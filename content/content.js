@@ -1,22 +1,37 @@
-// Testing purpose: https://ereg.ksrzis.cz/Registr/CUDZadanky/PacientDetail/Index/10301493
+// Testing purpose: Delta https://ereg.ksrzis.cz/Registr/CUDZadanky/PacientDetail/Index/10301493
 // Testing purpose: Omicron https://ereg.ksrzis.cz/Registr/CUDZadanky/PacientDetail/Index/11263038
 
-// TODO: all
 // TODO: no static
+// https://www.uzis.cz/res/file/covid/covid-19-datove-rozhrani-metodika-vysledky-v-1-3.pdf
 var mutationSectionsTable = {
     "S": [
         "A570D",
+        "A701V",
+        "D614G",
+        "Del144",
+        "Del141-143",
+        "Del145-146",
         "Del69-70",
         "E484K",
+        "E484Q",
+        "F888L",
+        "H655Y",
         "K417N",
+        "K417T",
+        "L452R",
         "N439K",
+        "N501T",
         "N501Y",
         "P681H",
+        "P681R",
+        "Q677H",
+        "S477N",
         "T761I",
-        "L452R",
-        "Y505H",
-        "K417T",
-        "P681R"
+        "T478K",
+        "T478R",
+        "T716I",
+        "V1176F",
+        "W152C"
     ]
 };
 
@@ -84,7 +99,7 @@ function translateMutationToCovSpectrumOrgAdvancedSearch(mutation) {
                 // output       [section]:[startPos]- ... (!)[endPos]-
                 //
                 // (!) is optional exclamation mark = when is mutation negative
-                if(mutation.Kod.includes("-")) {
+                if(mutation.Kod.startsWith("Del") && mutation.Kod.includes("-")) {
                     var delimeterPos = mutation.Kod.indexOf("-");
                     var startDelPos = mutation.Kod.substr(3, delimeterPos - 3);
                     var endDelPos = mutation.Kod.substr(delimeterPos + 1, mutation.Kod.length - delimeterPos + 1);
@@ -97,6 +112,22 @@ function translateMutationToCovSpectrumOrgAdvancedSearch(mutation) {
                         }
                         resultString += section + ":" + pos + "-";
                     }
+                }
+                // deletion
+                //
+                // input        [del][pos]
+                // output       [section]:(!)[pos]-
+                //
+                // (!) is optional exclamation mark = when is mutation negative
+                else if(mutation.Kod.startsWith("Del")) {
+                    var pos = mutation.Kod.substr(3, mutation.Kod.length - 3);
+                    if(resultString.length) {
+                        resultString += " & ";
+                    }
+                    if(mutation.Vysledek == "Negativní") {
+                        resultString += "!";
+                    }
+                    resultString += section + ":" + pos + "-";
                 } 
                 // replace
                 //
