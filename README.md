@@ -3,6 +3,7 @@
 [Rozšíření do Mozilla Firefox](https://addons.mozilla.org/addon/pro-oc-mutation-tracker/)
 
 ![Preview](preview/nahled.png)
+![Preview](preview/nahled_2.png)
 
 Rozšíření přidává do modulu [Pacienti COVID-19](https://ereg.ksrzis.cz/Registr/CUDZadanky/VyhledaniPacienta) rozšířenost zjištěných mutací a % klasifikaci [WHO označení](https://www.who.int/en/activities/tracking-SARS-CoV-2-variants#PageContent_C238_Col01) varianty podle celogenomově sekvenovaných vzorků z testovaných mutací. V potaz se berou vyvrácené i potvrzené.
 
