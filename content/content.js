@@ -31,7 +31,8 @@ var mutationSectionsTable = {
         "T478R",
         "T716I",
         "V1176F",
-        "W152C"
+        "W152C",
+        "Y505H"
     ]
 };
 
