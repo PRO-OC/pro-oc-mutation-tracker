@@ -373,8 +373,19 @@ function getCovLineagesLineageUrl(lineageName) {
     return "https://cov-lineages.org/lineage.html?lineage=" + lineageName;
 }
 
-function getNextstrainTrackingVariantsUrl() {
-    return "https://covariants.org/";
+async function getNextstrainTrackingVariantsUrl(pangoLineageLabel) {
+    
+    return new Promise(function (resolve, reject) {
+        var pangoLineageLabelUrl = pangoLineageLabel.replace(" ", ".");
+        pangoLineageLabelUrl = pangoLineageLabelUrl.replace("(", "");
+        pangoLineageLabelUrl = pangoLineageLabelUrl.replace(")", "");
+    
+        var baseUrl = "https://covariants.org";
+
+        var url = baseUrl + "/variants/" + pangoLineageLabelUrl;
+
+        resolve(url);
+    });
 }
 
 function getPHETrackingVariantsUrl() {
@@ -451,6 +462,7 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
             }
 
             var pangoLineageLabels = await getPangolinLineageLabels(pangolin.pangoLineage);
+            const nextrainTrackingVariantsUrl = await getNextstrainTrackingVariantsUrl(pangoLineageLabels[LINEAGE_LABEL_NEXTSTRAIN]);
 
             // Why data (variable pangolinLineages) are from past 1 month and link is since ages up to now?
             //
@@ -459,7 +471,7 @@ async function addAdditionalMutationInformation(regions, timeFrames) {
                 "<a href='" + getCovLineagesLineageUrl(pangolin.pangoLineage) + "'>" + pangolin.pangoLineage + "</a>",
                 "<a href='" + getWHOTrackingVariantsUrl() + "'>" + pangoLineageLabels[LINEAGE_LABEL_WHO] + "</a>",
                 "<a href='" + getPHETrackingVariantsUrl() + "'>" + pangoLineageLabels[LINEAGE_LABEL_PHE] + "</a>",
-                "<a href='" + getNextstrainTrackingVariantsUrl() + "'>" + pangoLineageLabels[LINEAGE_LABEL_NEXTSTRAIN] + "</a>",
+                "<a href='" + nextrainTrackingVariantsUrl + "'>" + pangoLineageLabels[LINEAGE_LABEL_NEXTSTRAIN] + "</a>",
                 "<a href='" + getCovSpectrumUrl(REGION_CZECHIA, ALL_TIMES, mutations) + "'>" + percents + "%" + "</a>"
             ];
 
