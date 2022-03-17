@@ -19,3 +19,8 @@ Osobní informace pacientů podmíněné přihlášením do modulu [Pacienti COV
 ## Zdroj
 
 - [https://open.cov-spectrum.org/](https://open.cov-spectrum.org/)
+
+## Použité knihovny
+
+- [jQuery 3.6.0](https://code.jquery.com/jquery-3.6.0.min.js)
+- [d3 v7](https://d3js.org/d3.v7.min.js)
