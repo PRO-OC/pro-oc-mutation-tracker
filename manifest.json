@@ -14,7 +14,7 @@
     "matches": [
       "*://*.ksrzis.cz/*"
     ],
-    "js": ["libs/jquery-3.6.0.min.js", "libs/d3.v3.min.js", "content/content.js"]
+    "js": ["libs/jquery-3.6.0.min.js", "libs/d3.v7.min.js", "content/content.js"]
   }],
   "permissions": []
 }
